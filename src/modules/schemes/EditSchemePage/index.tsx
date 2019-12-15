@@ -29,7 +29,8 @@ const EditSchemePage: FC<FormComponentProps & RouteComponentProps> = ({
   );
 
   useEffect(() => {
-    form.setFieldsValue({fields})
+    const result = _.map(fields, field => _.omit(field, 'options'));
+    form.setFieldsValue({fields: result})
     // eslint-disable-next-line
   }, []);
 
@@ -77,7 +78,26 @@ const EditSchemePage: FC<FormComponentProps & RouteComponentProps> = ({
 
     validateFields((errors, values) => {
       if (!errors) {
-        postFormById(id, {schema: values})
+        const fields = _.map(values.fields, (item) => (
+          item.type === 'phone'
+          ? {
+            ...item,
+            validation: {
+              ...item.validation,
+              pattern: `^(\\+7|8)\\s\\(\\d{1,3}\\)\\s\\d{3}-\\d{2}-\\d{2}$`
+            }
+          }
+          : item
+        ));
+
+        const result = {
+          schema: {
+            name: values.name,
+            fields,
+          }
+        };
+
+        postFormById(id, result)
           .then(() => history.push(`/schemes/my/${id}`))
           .catch(err => console.error(err));
       } else {

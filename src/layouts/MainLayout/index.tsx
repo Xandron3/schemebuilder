@@ -17,7 +17,8 @@ const Header = styled(CoreHeader)`
 `;
 
 const Content = styled.div`
-  width: 1050px;
+  width: 100%;
+  max-width: 1050px;
   align-self: center;
   padding-top: 50px;
   padding-bottom: 32px;

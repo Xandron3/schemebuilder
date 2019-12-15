@@ -13,6 +13,12 @@ import {fields} from './config'
 
 const {Item: FormItem} = CoreForm;
 
+const Wrapper = styled.div`
+  .ant-form-item-children .ant-form-item {
+    margin: 0;
+  }
+`;
+
 const Container = styled.div`
   display: flex;
   justify-content: space-between;
@@ -36,7 +42,6 @@ interface Props extends FormComponentProps {
 }
 
 const AddPrpertyForm: FC<Props> = ({form, keyPrefix, ...props}) => {
-  const {getFieldDecorator} = form;
   const [options, setOptions] = useState<object[]>(_.get(props, 'options') || [{}]);
 
   const type = useMemo(() => form.getFieldValue(`${keyPrefix}type`), [form, keyPrefix]);
@@ -48,15 +53,18 @@ const AddPrpertyForm: FC<Props> = ({form, keyPrefix, ...props}) => {
       });
     }
   // eslint-disable-next-line
-  }, [options, type, keyPrefix]);
+  }, [options, type]);
 
-  const handleAddOption = useCallback(() => {
+  const handleAddOption = useCallback((e) => {
+    e.target.blur();
     setOptions([...options, {}])
   }, [options]);
 
   const handleRemoveOption = useCallback((index) => {
     setOptions(options.filter((item, idx) => index !== idx))
   }, [options]);
+
+  const {getFieldDecorator} = form;
 
   return (
     <Container>
@@ -110,48 +118,48 @@ const AddPrpertyForm: FC<Props> = ({form, keyPrefix, ...props}) => {
           )}
         </FormItem>
         {type === 'select' && (
-          <>
-          {options.map((option, index) => (
-            <FormItem
-              key={index}
-              wrapperCol={{span: 22, offset: 2}}
-            >
-              <FormItem required>
-                {getFieldDecorator(`${keyPrefix}options[${index}].key`, {
-                  rules: [{required: true, message: 'Обязательно для заполнения'}]
-                })(
-                  <Input
-                    placeholder="Значение опции"
-                    size="large"
-                    suffix={options.length > 1 && (
-                      <Icon
-                        type="close"
-                        onClick={handleRemoveOption.bind(null, index)}
-                      />
-                    )}
-                  />
-                )}
+          <Wrapper>
+            {options.map((option, index) => (
+              <FormItem
+                key={index}
+                wrapperCol={{span: 22, offset: 2}}
+              >
+                <FormItem required>
+                  {getFieldDecorator(`${keyPrefix}options[${index}].key`, {
+                    rules: [{required: true, message: 'Обязательно для заполнения'}]
+                  })(
+                    <Input
+                      placeholder="Значение опции"
+                      size="large"
+                      suffix={options.length > 1 && (
+                        <Icon
+                          type="close"
+                          onClick={handleRemoveOption.bind(null, index)}
+                        />
+                      )}
+                    />
+                  )}
+                </FormItem>
+                <FormItem required>
+                  {getFieldDecorator(`${keyPrefix}options[${index}].value`, {
+                    rules: [{required: true, message: 'Обязательно для заполнения'}]
+                  })(
+                    <Input
+                      placeholder="Ключ опции"
+                      size="large"
+                    />
+                  )}
+                </FormItem>
               </FormItem>
-              <FormItem required>
-                {getFieldDecorator(`${keyPrefix}options[${index}].value`, {
-                  rules: [{required: true, message: 'Обязательно для заполнения'}]
-                })(
-                  <Input
-                    placeholder="Ключ опции"
-                    size="large"
-                  />
-                )}
-              </FormItem>
+            ))}
+            <FormItem wrapperCol={{span: 22, offset: 2}}>
+              <Input
+                placeholder="Добавить вариант"
+                size="large"
+                onFocus={handleAddOption}
+              />
             </FormItem>
-          ))}
-          <FormItem wrapperCol={{span: 22, offset: 2}}>
-            <Input
-              placeholder="Добавить вариант"
-              size="large"
-              onFocus={handleAddOption}
-            />
-          </FormItem>
-          </>
+          </Wrapper>
         )}
       </GeneralSection>
       <ValidationSection>

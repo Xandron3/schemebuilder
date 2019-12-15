@@ -67,7 +67,26 @@ const CreateSchemePage: FC<FormComponentProps & RouteComponentProps> = ({
 
     validateFields((errors, values) => {
       if (!errors) {
-        postForm({schema: values})
+        const fields = _.map(values.fields, (item) => (
+          item.type === 'phone'
+          ? {
+            ...item,
+            validation: {
+              ...item.validation,
+              pattern: `^(\\+7|8)\\s\\(\\d{1,3}\\)\\s\\d{3}-\\d{2}-\\d{2}$`
+            }
+          }
+          : item
+        ));
+
+        const result = {
+          schema: {
+            name: values.name,
+            fields,
+          }
+        };
+
+        postForm(result)
           .then(({id}) => history.push(`/schemes/my/${id}`))
           .catch(err => console.error(err));
       } else {
